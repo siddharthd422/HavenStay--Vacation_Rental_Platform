@@ -1,0 +1,114 @@
+<% layout("/layouts/boilerplate")%>
+<body>
+
+     <div id="filters">
+         <a href="/listings<%= search ? '?search=' + encodeURIComponent(search) : '' %>" class="filter-link">
+            <div class="filter <%= !category ? 'active' : '' %>">
+               <div><i class="fa-solid fa-fire"></i></div>
+               <p>Trending</p>
+            </div>
+         </a>
+         <% const categories = [
+            { key: "rooms", label: "Rooms", icon: "fa-solid fa-bed" },
+            { key: "iconic-cities", label: "Iconic cities", icon: "fa-solid fa-mountain-city" },
+            { key: "mountains", label: "Mountains", icon: "fa-solid fa-mountain-sun" },
+            { key: "castles", label: "Castles", icon: "fa-brands fa-fort-awesome" },
+            { key: "pools", label: "Amazing Pools", icon: "fa-solid fa-person-swimming" },
+            { key: "camping", label: "Camping", icon: "fa-solid fa-campground" },
+            { key: "farms", label: "Farms", icon: "fa-solid fa-seedling" },
+            { key: "arctic", label: "Arctic", icon: "fa-solid fa-snowflake" },
+            { key: "domes", label: "Domes", icon: "fa-solid fa-igloo" },
+            { key: "boats", label: "Boats", icon: "fa-solid fa-ship" },
+         ]; %>
+         <% for (const c of categories) { %>
+            <a href="/listings?category=<%= c.key %><%= search ? '&search=' + encodeURIComponent(search) : '' %>" class="filter-link">
+               <div class="filter <%= category === c.key ? 'active' : '' %>">
+                  <div><i class="<%= c.icon %>"></i></div>
+                  <p><%= c.label %></p>
+               </div>
+            </a>
+         <% } %>
+         <div class="tax-toggle">
+            <div class="form-check-reverse form-switch">
+               <input class="form-check-input" type="checkbox" role="switch" id="switchCheckDefault">
+               <label class="form-check-label" for="switchCheckDefault">See Total After Taxes</label>
+            </div>
+         </div>
+     </div>
+
+     <% if (search) { %>
+        <div class="search-status">
+           Showing results for "<b><%= search %></b>"
+           <a href="/listings<%= category ? '?category=' + category : '' %>" class="clear-search">Clear search</a>
+        </div>
+     <% } %>
+
+     <% if (allListings.length === 0) { %>
+        <div class="empty-state">
+           <i class="fa-solid fa-compass"></i>
+           <h4>No listings match that search</h4>
+           <p>Try a different destination or clear your filters.</p>
+           <a href="/listings" class="btn btn-outline-dark btn-sm">Show all listings</a>
+        </div>
+     <% } else { %>
+     <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 g-4 mt-1">
+         <% for(let listing of allListings) {%>
+            <% let avgRating = null;
+               if (listing.reviews && listing.reviews.length > 0) {
+                   let sum = listing.reviews.reduce((acc, r) => acc + r.rating, 0);
+                   avgRating = (sum / listing.reviews.length).toFixed(1);
+               }
+            %>
+            <a href="/listings/<%=listing._id%>" class="listing-link">
+               <div class="card col listing-card">
+                  <div class="listing-thumb">
+                     <img src="<%=listing.image.url%>" class="card-img-top" alt="<%=listing.title%>">
+                     <div class="card-img-overlay"></div>
+                     <% if (listing.category) { %>
+                        <span class="thumb-badge"><%= listing.category.replace("-", " ") %></span>
+                     <% } %>
+                  </div>
+                  <div class="card-body">
+                     <div class="listing-title-row">
+                        <div class="listing-title"><%=listing.title%></div>
+                        <% if (avgRating) { %>
+                           <span class="listing-rating"><i class="fa-solid fa-star"></i> <%= avgRating %></span>
+                        <% } %>
+                     </div>
+                     <div class="listing-subtitle"><%=listing.location%>, <%=listing.country%></div>
+                     <div class="card-text">
+                        <% if (listing.price) { %>
+                           <span class="price-tag">&#8377;<%= listing.price.toLocaleString("en-IN") %></span> / night
+                           <i class="tax-info">&nbsp;&nbsp;+18% GST</i>
+                        <% } else { %>
+                           Price not available
+                        <% } %>
+                     </div>
+                  </div>
+               </div>
+            </a>
+            <%}%>
+      </div>
+      <% } %>
+
+    
+</body>
+
+
+
+<script>
+   let taxSwitch = document.getElementById("switchCheckDefault");
+   taxSwitch.addEventListener("click",() => {
+      let taxInfo = document.getElementsByClassName("tax-info");
+
+      for(info of taxInfo){
+         if(info.style.display != "inline"){
+            info.style.display = "inline";
+         }
+         else{
+            info.style.display = "none";
+         }
+      }
+
+   });
+</script>
